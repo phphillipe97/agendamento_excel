@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agendar Procedimento</title>
+    <style>
+        /* Reset de estilos padrões do navegador */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Corpo da página */
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f7f7f7;
+            color: #333;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        /* Container do formulário */
+        .form-container {
+            background-color: #fff;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            border-radius: 8px;
+            width: 100%;
+            max-width: 600px;
+            box-sizing: border-box;
+        }
+
+        /* Título */
+        h1 {
+            text-align: center;
+            font-size: 28px;
+            margin-bottom: 20px;
+            color: #4CAF50;
+        }
+
+        /* Labels do formulário */
+        label {
+            font-size: 16px;
+            margin-bottom: 8px;
+            display: block;
+            color: #555;
+        }
+
+        /* Campos de entrada */
+        input, textarea, select {
+            width: 100%;
+            padding: 15px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        input:focus, textarea:focus, select:focus {
+            border-color: #4CAF50;
+            outline: none;
+        }
+
+        /* Estilo para campos obrigatórios */
+        .required {
+            color: red;
+        }
+
+        /* Botão de envio */
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 8px;
+            width: 100%;
+            font-size: 18px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        /* Estilo para a mensagem de sucesso */
+        .success-message {
+            text-align: center;
+            color: green;
+            font-size: 18px;
+            margin-top: 20px;
+        }
+
+        .error-message {
+            text-align: center;
+            color: red;
+            font-size: 18px;
+            margin-top: 20px;
+        }
+
+        /* Adicionando responsividade */
+        @media (max-width: 600px) {
+            .form-container {
+                padding: 20px;
+            }
+
+            button {
+                font-size: 16px;
+                padding: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <h1>Agendar Procedimento</h1>
+        <form id="agendamentoForm">
+            <label for="nomePaciente">Nome do Paciente <span class="required">*</span>:</label>
+            <input type="text" id="nomePaciente" name="nomePaciente" required placeholder="Ex: João Silva">
+
+            <label for="cpf">CPF <span class="required">*</span>:</label>
+            <input type="text" id="cpf" name="cpf" required placeholder="Ex: 123.456.789-00">
+
+            <label for="dataNascimento">Data de Nascimento <span class="required">*</span>:</label>
+            <input type="date" id="dataNascimento" name="dataNascimento" required>
+
+            <label for="procedimento">Procedimento Feito <span class="required">*</span>:</label>
+            <input type="text" id="procedimento" name="procedimento" required placeholder="Ex: Cirurgia de Catarata">
+
+            <label for="status">Status <span class="required">*</span>:</label>
+            <select id="status" name="status" required>
+                <option value="Agendado">Agendado</option>
+                <option value="Concluído">Concluído</option>
+                <option value="Cancelado">Cancelado</option>
+            </select>
+
+            <button type="submit">Agendar</button>
+        </form>
+
+        <div id="successMessage" class="success-message" style="display: none;">
+            Procedimento agendado com sucesso!
+        </div>
+        <div id="errorMessage" class="error-message" style="display: none;">
+            Erro ao agendar o procedimento. Tente novamente.
+        </div>
+    </div>
+
+    <script>
+        // Máscara de CPF
+        document.getElementById('cpf').addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, ''); // Remove tudo que não é número
+            if (value.length <= 11) {
+                value = value.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
+            }
+            e.target.value = value;
+        });
+
+        document.getElementById('agendamentoForm').addEventListener('submit', function(event) {
+            event.preventDefault(); // Impede o envio tradicional do formulário
+
+            const nomePaciente = document.getElementById('nomePaciente').value;
+            const cpf = document.getElementById('cpf').value;
+            const dataNascimento = document.getElementById('dataNascimento').value;
+            const procedimento = document.getElementById('procedimento').value;
+            const status = document.getElementById('status').value;
+
+            fetch('http://localhost:5000/agendar', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ nomePaciente, cpf, dataNascimento, procedimento, status })
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Exibe a mensagem de sucesso
+                document.getElementById('successMessage').style.display = 'block';
+                document.getElementById('agendamentoForm').reset(); // Limpa o formulário
+            })
+            .catch(error => {
+                // Exibe a mensagem de erro
+                document.getElementById('errorMessage').style.display = 'block';
+            });
+        });
+    </script>
+</body>
+</html>
